@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "playtime-tracker",
+  "version": "${version}",
+  "name": "Playtime Tracker",
+  "description": "Tracks playtime without including AFK time",
+  "authors": [
+    "SpaceClouds42"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": "",
+    "issues": ""
+  },
+  "license": "LGPL",
+  "icon": "assets/playtime_tracker/icon.png",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      {
+        "value": "us.spaceclouds42.playtime_tracker.Common::INSTANCE"
+      }
+    ]
+  },
+  "mixins": [
+    "playtime_tracker.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.1",
+    "fabric": "*",
+    "fabric-language-kotlin": ">=1.5.0+kotlin.1.4.31",
+    "minecraft": "^1.16.5"
+  }
+}

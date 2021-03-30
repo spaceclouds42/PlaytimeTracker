@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "us.spaceclouds42.playtime_tracker.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
