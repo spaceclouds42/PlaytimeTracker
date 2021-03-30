@@ -20,6 +20,7 @@ repositories {
     maven { url = "http://maven.fabricmc.net/" }
     maven { url = "https://dl.bintray.com/kotlin/kotlin-eap" }
     maven { url = "https://dl.bintray.com/kotlin/dokka" }
+    maven { url = "https://jitpack.io" }
     mavenCentral()
 }
 
@@ -35,6 +36,10 @@ dependencies {
     // Kotlin
     modImplementation "net.fabricmc:fabric-language-kotlin:${project.fabric_kotlin_version}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
+    // Aegis
+    modImplementation "com.github.P03W:Aegis:${project.aegis_version}"
+    include "com.github.P03W:Aegis:${project.aegis_version}"
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
