@@ -3,8 +3,8 @@
   "package": "us.spaceclouds42.playtime_tracker.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "ServerPlayerEntityMixin_AFKTracking",
-    "ServerPlayNetworkHandlerMixin_AFKDetection"
+    "ServerPlayerEntityMixin_DataStorage",
+    "ServerPlayNetworkHandlerMixin_TimeTracker"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
 
 @Mixin(ServerPlayerEntity.class)
-abstract class ServerPlayerEntityMixin_AFKTracking implements AFKPlayer {
+abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
     @Unique private boolean isAfk;
     @Unique private long playtime;
 

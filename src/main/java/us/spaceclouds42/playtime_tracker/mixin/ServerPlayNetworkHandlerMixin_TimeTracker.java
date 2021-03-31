@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
 
 @Mixin(ServerPlayNetworkHandler.class)
-abstract class ServerPlayNetworkHandlerMixin_AFKDetection {
+abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
     @Shadow public ServerPlayerEntity player;
     @Unique private long lastTickTime = Util.getMeasuringTimeMs();
 
@@ -22,7 +22,7 @@ abstract class ServerPlayNetworkHandlerMixin_AFKDetection {
                     value = "TAIL"
             )
     )
-    private void detectAFKPlayer(CallbackInfo ci) {
+    private void trackTime(CallbackInfo ci) {
         AFKPlayer afkPlayer = (AFKPlayer) player;
         long nowTickTime = Util.getMeasuringTimeMs();
 
