@@ -15,6 +15,7 @@ import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
 abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
     @Shadow public ServerPlayerEntity player;
     @Unique private long lastTickTime = Util.getMeasuringTimeMs();
+    @Unique private final long afkTime = 60000L;
 
     @Inject(
             method = "tick",
@@ -23,18 +24,26 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
             )
     )
     private void trackTime(CallbackInfo ci) {
-        AFKPlayer afkPlayer = (AFKPlayer) player;
+        AFKPlayer afkPlayer = (AFKPlayer) this.player;
         long nowTickTime = Util.getMeasuringTimeMs();
 
-        if (player.getLastActionTime() > 0L && player.getLastActionTime() > 300000L) {
-            afkPlayer.setAfk(true);
-            afkPlayer.setPlaytime(afkPlayer.getPlaytime() - 300000L); // removes last 5 afk minutes of playtime
+        if (!afkPlayer.isAfk()) {
+            if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() > this.afkTime) {
+                System.out.println("Player has been afk for over 1 minute");
+                afkPlayer.setAfk(true);
+                afkPlayer.setPlaytime(afkPlayer.getPlaytime() - this.afkTime); // removes last 5 afk minutes of playtime
+            } else {
+                afkPlayer.setPlaytime(
+                        afkPlayer.getPlaytime() + (nowTickTime - this.lastTickTime)
+                );
+            }
         } else {
-            afkPlayer.setPlaytime(
-                    afkPlayer.getPlaytime() + (nowTickTime - lastTickTime)
-            );
+            if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() < this.afkTime) {
+                System.out.println("Player is no longer afk");
+                afkPlayer.setAfk(false);
+            }
         }
 
-        lastTickTime = nowTickTime;
+        this.lastTickTime = nowTickTime;
     }
 }
