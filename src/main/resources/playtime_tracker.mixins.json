@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "ServerPlayerEntityMixin_DataStorage",
-    "ServerPlayNetworkHandlerMixin_TimeTracker"
+    "ServerPlayNetworkHandlerMixin_TimeTracker",
+    "access.IAccessPlayerManager"
   ],
   "injectors": {
     "defaultRequire": 1

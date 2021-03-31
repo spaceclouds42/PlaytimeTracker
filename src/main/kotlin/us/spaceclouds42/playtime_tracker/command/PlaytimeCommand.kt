@@ -5,10 +5,18 @@ import com.mojang.authlib.GameProfile
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
+import me.basiqueevangelist.nevseti.OfflineDataCache
+import me.basiqueevangelist.nevseti.OfflineNameCache
 import net.minecraft.command.argument.GameProfileArgumentType
+import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.LiteralText
 import us.spaceclouds42.playtime_tracker.Context
 import us.spaceclouds42.playtime_tracker.Node
-import us.spaceclouds42.playtime_tracker.toTime
+import us.spaceclouds42.playtime_tracker.duck.AFKPlayer
+import us.spaceclouds42.playtime_tracker.extension.prettyPrint
+import us.spaceclouds42.playtime_tracker.extension.toPlayer
+import us.spaceclouds42.playtime_tracker.extension.toTime
+import us.spaceclouds42.playtime_tracker.mixin.access.IAccessPlayerManager
 
 class PlaytimeCommand {
     fun register(): Node {
@@ -126,42 +134,105 @@ class PlaytimeCommand {
     }
 
     private fun helpCommand(context: Context, command: String?) {
-        print("help message")
-
         if (command != null) {
-            println(" about $command command")
+            println("help message about $command command")
         } else {
-            println()
+            println("general help message")
         }
     }
 
     private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>) {
         targets.forEach { target ->
-            println("getting playtime of ${target.name}")
+            val player = target.toPlayer(context.source.minecraftServer.playerManager) as AFKPlayer
+            val time = player.playtime.prettyPrint()
+
+            context.source.sendFeedback(
+                LiteralText("§9${target.name} §ehas §9$time §eof playtime."),
+                false
+            )
         }
     }
 
     private fun setTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long) {
+        val manager = context.source.minecraftServer.playerManager
+
         targets.forEach { target ->
-            println("setting ${target.name} to $time")
+            val player = target.toPlayer(manager) as AFKPlayer
+
+            player.playtime = time
+            (manager as IAccessPlayerManager).invokeSavePlayerData(player as ServerPlayerEntity)
+
+            context.source.sendFeedback(
+                LiteralText("§eSet §9${target.name} §eto §9${time.prettyPrint()} §eof playtime."),
+                true
+            )
         }
     }
 
     private fun addTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long) {
+        val manager = context.source.minecraftServer.playerManager
+
         targets.forEach { target ->
-            println("adding $time to ${target.name}")
+            val newTime = (target.toPlayer(manager) as AFKPlayer).playtime + time
+            setTimeCommand(context, listOf(target).iterator(), newTime)
         }
     }
 
     private fun topCommand(context: Context, count: Int = 3) {
-        println("printing top $count players")
+        val source = context.source
+
+        source.sendFeedback(
+            LiteralText("§2====< §aLeaderboard §2>===="),
+            false
+        )
+
+        val times = mutableMapOf<String, Long?>()
+        OfflineDataCache.INSTANCE.players.forEach { (uuid, tag) ->
+            val name = OfflineNameCache.INSTANCE.getNameFromUUID(uuid)
+            val time = if (tag.contains("Playtime")) { tag.getLong("Playtime") } else { null }
+            times[name] = time
+        }
+
+        val top = times.toList().sortedBy { (_, value) -> value }.asReversed().toMap()
+        var n = 1
+        for (entry in top) {
+            if (entry.value == null) {
+                break
+            }
+
+            source.sendFeedback(
+                LiteralText("§a${n}. §b${entry.key}: ${entry.value!!.prettyPrint()}"),
+                false
+            )
+
+            if (n++ > count) {
+                break
+            }
+        }
     }
 
     private fun resetCommand(context: Context, confirm: Boolean = false) {
         if (confirm) {
-            println("resetting all playtime")
+            var count = 0
+            OfflineDataCache.INSTANCE.players.forEach { (uuid, immutableTag) ->
+                val tag = immutableTag.copy()
+                if (tag.contains("Playtime")) {
+                    tag.putLong("Playtime", 0L)
+                    OfflineDataCache.INSTANCE.save(uuid, tag)
+                }
+                count++
+            }
+            context.source.sendFeedback(
+                LiteralText("§aReset §e$count §aplaytime(s)."),
+                true
+            )
         } else {
-            println("need confirmation before resetting all playtime. click here")
+            context.source.sendError(
+                LiteralText(
+                    "§cAre you sure you want to reset all playtimes? This action is not reversible! If you are" +
+                            " certain you wish to proceed, run:\n§7/playtime reset true"
+                )
+            )
         }
     }
 }

@@ -1,4 +1,4 @@
-package us.spaceclouds42.playtime_tracker
+package us.spaceclouds42.playtime_tracker.extension
 
 import com.mojang.brigadier.StringReader
 
