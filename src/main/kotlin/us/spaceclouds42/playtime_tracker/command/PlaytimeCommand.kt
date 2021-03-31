@@ -121,6 +121,10 @@ class PlaytimeCommand {
                 }
 
                 bool("confirm") {
+                    requires {
+                        it.hasPermissionLevel(4)
+                    }
+
                     executes {
                         resetCommand(
                             it,
@@ -143,13 +147,30 @@ class PlaytimeCommand {
 
     private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>) {
         targets.forEach { target ->
-            val player = target.toPlayer(context.source.minecraftServer.playerManager) as AFKPlayer
-            val time = player.playtime.prettyPrint()
-
-            context.source.sendFeedback(
-                LiteralText("§9${target.name} §ehas §9$time §eof playtime."),
-                false
-            )
+            val player = target.toPlayer(context.source.minecraftServer.playerManager) as AFKPlayer?
+            if (player != null) {
+                val time = player.playtime.prettyPrint()
+                context.source.sendFeedback(
+                    LiteralText("§9${target.name} §ehas §9$time §eof playtime."),
+                    false
+                )
+            } else {
+                val offlineData = OfflineDataCache.INSTANCE.players[target.id]
+                if (offlineData != null && offlineData.contains("Playtime")) {
+                    context.source.sendFeedback(
+                        LiteralText(
+                            "§9${target.name} §ehas §9${offlineData.getLong("Playtime").prettyPrint()}" +
+                                    " §eof playtime."
+                        ),
+                        false
+                    )
+                } else {
+                    context.source.sendFeedback(
+                        LiteralText("§cPlaytime data for §9${target.name} §cnot found!"),
+                        false
+                    )
+                }
+            }
         }
     }
 
@@ -157,7 +178,14 @@ class PlaytimeCommand {
         val manager = context.source.minecraftServer.playerManager
 
         targets.forEach { target ->
-            val player = target.toPlayer(manager) as AFKPlayer
+            var requestedPlayer = target.toPlayer(manager)
+
+            if (requestedPlayer == null) {
+                requestedPlayer = manager.createPlayer(target)
+                manager.loadPlayerData(requestedPlayer)
+            }
+
+            val player = requestedPlayer as AFKPlayer
 
             player.playtime = time
             (manager as IAccessPlayerManager).invokeSavePlayerData(player as ServerPlayerEntity)
@@ -173,8 +201,23 @@ class PlaytimeCommand {
         val manager = context.source.minecraftServer.playerManager
 
         targets.forEach { target ->
-            val newTime = (target.toPlayer(manager) as AFKPlayer).playtime + time
-            setTimeCommand(context, listOf(target).iterator(), newTime)
+            val player = target.toPlayer(manager) as AFKPlayer?
+
+            // Online Player
+            if (player != null) {
+                setTimeCommand(context, listOf(target).iterator(), player.playtime + time)
+            } else {
+
+                // Offline Player
+                val offlineData = OfflineDataCache.INSTANCE.players[target.id]
+                if (offlineData != null && offlineData.contains("Playtime")) {
+                    setTimeCommand(context, listOf(target).iterator(), offlineData.getLong("Playtime") + time)
+
+                // Player not found
+                } else {
+                    setTimeCommand(context, listOf(target).iterator(), time)
+                }
+            }
         }
     }
 
@@ -191,6 +234,11 @@ class PlaytimeCommand {
             val name = OfflineNameCache.INSTANCE.getNameFromUUID(uuid)
             val time = if (tag.contains("Playtime")) { tag.getLong("Playtime") } else { null }
             times[name] = time
+        }
+
+        // Use latest data for any online players
+        context.source.minecraftServer.playerManager.playerList.forEach { player ->
+            times[player.entityName] = (player as AFKPlayer).playtime
         }
 
         val top = times.toList().sortedBy { (_, value) -> value }.asReversed().toMap()
@@ -213,17 +261,20 @@ class PlaytimeCommand {
 
     private fun resetCommand(context: Context, confirm: Boolean = false) {
         if (confirm) {
-            var count = 0
             OfflineDataCache.INSTANCE.players.forEach { (uuid, immutableTag) ->
                 val tag = immutableTag.copy()
                 if (tag.contains("Playtime")) {
                     tag.putLong("Playtime", 0L)
                     OfflineDataCache.INSTANCE.save(uuid, tag)
                 }
-                count++
             }
+
+            context.source.minecraftServer.playerManager.playerList.forEach { player ->
+                (player as AFKPlayer).playtime = 0L
+            }
+
             context.source.sendFeedback(
-                LiteralText("§aReset §e$count §aplaytime(s)."),
+                LiteralText("§aReset all playtime."),
                 true
             )
         } else {
