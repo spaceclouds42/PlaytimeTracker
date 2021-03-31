@@ -248,12 +248,19 @@ class PlaytimeCommand {
                 break
             }
 
-            source.sendFeedback(
-                LiteralText("§a${n}. §b${entry.key}: ${entry.value!!.prettyPrint()}"),
-                false
-            )
+            if (n % 2 == 0) {
+                source.sendFeedback(
+                    LiteralText("§a${n}. §b${entry.key}: ${entry.value!!.prettyPrint()}"),
+                    false
+                )
+            } else {
+                source.sendFeedback(
+                    LiteralText("§2${n}. §3${entry.key}: ${entry.value!!.prettyPrint()}"),
+                    false
+                )
+            }
 
-            if (n++ > count) {
+            if (n++ == count) {
                 break
             }
         }
