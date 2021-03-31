@@ -29,7 +29,6 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
 
         if (!afkPlayer.isAfk()) {
             if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() > this.afkTime) {
-                System.out.println("Player has been afk for over 1 minute");
                 afkPlayer.setAfk(true);
                 afkPlayer.setPlaytime(afkPlayer.getPlaytime() - this.afkTime); // removes last 5 afk minutes of playtime
             } else {
@@ -39,7 +38,6 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
             }
         } else {
             if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() < this.afkTime) {
-                System.out.println("Player is no longer afk");
                 afkPlayer.setAfk(false);
             }
         }
