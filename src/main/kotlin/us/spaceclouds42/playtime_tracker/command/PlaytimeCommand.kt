@@ -17,40 +17,72 @@ class PlaytimeCommand {
                 it.hasPermissionLevel(2)
             }
 
-            executes {
-                helpCommand(
-                    it,
-                )
-            }
-
-            gameProfile("targets") {
+            literal("help") {
                 executes {
-                    getTimeCommand(
+                    helpCommand(
                         it,
-                        GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                        null,
                     )
                 }
 
-                literal("set") {
-                    greedyString("time") {
-                        executes {
-                            setTimeCommand(
-                                it,
-                                GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
-                                StringArgumentType.getString(it, "time").toTime(),
-                            )
-                        }
+                literal("player") {
+                    executes {
+                        helpCommand(
+                            it,
+                            "player",
+                        )
                     }
                 }
 
-                literal("add") {
-                    greedyString("time") {
-                        executes {
-                            addTimeCommand(
-                                it,
-                                GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
-                                StringArgumentType.getString(it, "time").toTime(),
-                            )
+                literal("top") {
+                    executes {
+                        helpCommand(
+                            it,
+                            "top",
+                        )
+                    }
+                }
+
+                literal("reset") {
+                    executes {
+                        helpCommand(
+                            it,
+                            "reset",
+                        )
+                    }
+                }
+            }
+
+            literal("player") {
+                gameProfile("targets") {
+                    executes {
+                        getTimeCommand(
+                            it,
+                            GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                        )
+                    }
+
+                    literal("set") {
+                        greedyString("time") {
+                            executes {
+                                setTimeCommand(
+                                    it,
+                                    GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                    StringArgumentType.getString(it, "time").toTime(),
+                                )
+                            }
+                        }
+                    }
+
+                    literal("add") {
+                        greedyString("time") {
+                            executes {
+                                addTimeCommand(
+                                    it,
+                                    GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                    StringArgumentType.getString(it, "time").toTime(),
+                                )
+                            }
                         }
                     }
                 }
@@ -93,8 +125,14 @@ class PlaytimeCommand {
             .build()
     }
 
-    private fun helpCommand(context: Context) {
-        println("help message")
+    private fun helpCommand(context: Context, command: String?) {
+        print("help message")
+
+        if (command != null) {
+            println(" about $command command")
+        } else {
+            println()
+        }
     }
 
     private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>) {
