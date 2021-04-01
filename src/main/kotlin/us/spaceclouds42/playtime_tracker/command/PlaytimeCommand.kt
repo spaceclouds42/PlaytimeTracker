@@ -10,6 +10,8 @@ import me.basiqueevangelist.nevseti.OfflineNameCache
 import net.minecraft.command.argument.GameProfileArgumentType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.LiteralText
+import net.minecraft.text.Text
+import us.spaceclouds42.ekho.ekho
 import us.spaceclouds42.playtime_tracker.Context
 import us.spaceclouds42.playtime_tracker.Node
 import us.spaceclouds42.playtime_tracker.duck.AFKPlayer
@@ -138,11 +140,95 @@ class PlaytimeCommand {
     }
 
     private fun helpCommand(context: Context, command: String?) {
-        if (command != null) {
-            println("help message about $command command")
-        } else {
-            println("general help message")
+        val text = when (command) {
+            "player" -> {
+                ekho {
+                    style { gold }
+                    "["()
+                    "PlaytimeTracker" {
+                        style { yellow }
+                    }
+                    "] "()
+                    "Help:" {
+                        style { darkGreen }
+                    }
+
+                    newLine
+                    " Command: " {
+                        style { darkAqua }
+                    }
+                    "/playtime player <targets> [(add|set)] [<time>]" {
+                        style { gray }
+                    }
+
+                    newLine
+                    newLine
+                    " Parameters: " {
+                        style { darkAqua }
+                    }
+
+                    newLine
+                    "  targets" {
+                        style {
+                            green
+                            bold
+                        }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "required, specifies the player(s) to run the command on" {
+                            style { noBold }
+                            newLine
+                            "   if run without more parameters, will get the playtime of the targets" {
+                                style { italics }
+                            }
+                        }
+                    }
+
+                    newLine
+                    "  add" {
+                        style {
+                            darkGreen
+                            bold
+                        }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "optional, will add the input time to the playtime of the targets" {
+                            style { noBold }
+                        }
+                    }
+
+                    newLine
+                    "  set" {
+                        style {
+                            green
+                            bold
+                        }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "optional, will set the playtime of the targets to the input time" {
+                            style { noBold }
+                        }
+                    }
+                }
+            }
+
+            "top" -> {
+                ekho("..")
+            }
+
+            "reset" -> {
+                ekho("..")
+            }
+
+            else -> {
+                ekho("..")
+            }
         }
+        
+        context.source.sendFeedback(text, false)
     }
 
     private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>) {
