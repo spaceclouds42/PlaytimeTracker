@@ -57,6 +57,10 @@ dependencies {
     modImplementation "com.github.BasiqueEvangelist:ne-v-seti:${project.ne_v_seti_version}"
     include "com.github.BasiqueEvangelist:ne-v-seti:${project.ne_v_seti_version}"
 
+    // Ekho
+    modImplementation "com.github.SpaceClouds42:Ekho:${project.ekho_version}"
+    include "com.github.SpaceClouds42:Ekho:${project.ekho_version}"
+
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
 }
