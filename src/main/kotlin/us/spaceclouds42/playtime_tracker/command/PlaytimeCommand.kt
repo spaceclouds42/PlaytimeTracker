@@ -10,7 +10,6 @@ import me.basiqueevangelist.nevseti.OfflineNameCache
 import net.minecraft.command.argument.GameProfileArgumentType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.LiteralText
-import net.minecraft.text.Text
 import us.spaceclouds42.ekho.ekho
 import us.spaceclouds42.playtime_tracker.Context
 import us.spaceclouds42.playtime_tracker.Node
@@ -169,28 +168,18 @@ class PlaytimeCommand {
 
                     newLine
                     "  targets" {
-                        style {
-                            green
-                            bold
-                        }
+                        style { green; bold }
                         " - "(false) {
                             style { gray }
                         }
                         "required, specifies the player(s) to run the command on" {
                             style { noBold }
-                            newLine
-                            "   if run without more parameters, will get the playtime of the targets" {
-                                style { italics }
-                            }
                         }
                     }
 
                     newLine
                     "  add" {
-                        style {
-                            darkGreen
-                            bold
-                        }
+                        style { darkGreen; bold }
                         " - "(false) {
                             style { gray }
                         }
@@ -201,10 +190,7 @@ class PlaytimeCommand {
 
                     newLine
                     "  set" {
-                        style {
-                            green
-                            bold
-                        }
+                        style { green; bold }
                         " - "(false) {
                             style { gray }
                         }
@@ -212,19 +198,152 @@ class PlaytimeCommand {
                             style { noBold }
                         }
                     }
+
+                    newLine
+                    "  time" {
+                        style { darkGreen; bold }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "required, if using add/set. format: \"7d 2m 4s\"" {
+                            style { noBold }
+                        }
+                    }
+
+                    newLine
+                    "  if no parameter is use after targets, it will get the targets' playtime"() {
+                        style { green }
+                    }
                 }
             }
 
             "top" -> {
-                ekho("..")
+                ekho {
+                    style { gold }
+                    "["()
+                    "PlaytimeTracker" {
+                        style { yellow }
+                    }
+                    "] "()
+                    "Help:" {
+                        style { darkGreen }
+                    }
+
+                    newLine
+                    " Command: " {
+                        style { darkAqua }
+                    }
+                    "/playtime top [<count>]" {
+                        style { gray }
+                    }
+
+                    newLine
+                    newLine
+                    " Parameters: " {
+                        style { darkAqua }
+                    }
+
+                    newLine
+                    "  count" {
+                        style { green; bold }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "specifies how many players should be listed, default=3" {
+                            style { noBold }
+                        }
+                    }
+                }
             }
 
             "reset" -> {
-                ekho("..")
+                ekho {
+                    style { gold }
+                    "["()
+                    "PlaytimeTracker" {
+                        style { yellow }
+                    }
+                    "] "()
+                    "Help:" {
+                        style { darkGreen }
+                    }
+
+                    newLine
+                    " Command: " {
+                        style { darkAqua }
+                    }
+                    "/playtime reset [<confirm>]" {
+                        style { gray }
+                    }
+
+                    newLine
+                    newLine
+                    " Parameters: " {
+                        style { darkAqua }
+                    }
+
+                    newLine
+                    "  confirm" {
+                        style { green; bold }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "must be 'true' for playtimes to be reset, because " {
+                            style { noBold }
+                            "all" {
+                                style { bold }
+                            }
+                            " playtime will be reset"()
+                        }
+                    }
+                }
             }
 
             else -> {
-                ekho("..")
+                ekho {
+                    style { gold }
+                    "["()
+                    "PlaytimeTracker" {
+                        style { yellow }
+                    }
+                    "] "()
+                    "Help:" {
+                        style { darkGreen }
+                    }
+
+                    newLine
+                    "Welcome to the help menu! For more info about specific commands, click below."() {
+                        style { darkAqua }
+                    }
+
+                    newLine
+                    "player (get/set/add playtime)"() {
+                        style {
+                            green
+                            clickEvent {
+                                runCommand = "/playtime help player"
+                            }
+                        }
+                    }
+                    newLine
+                    "top (playtime leaderboard)"() {
+                        style {
+                            darkGreen
+                            clickEvent {
+                                runCommand = "/playtime help top"
+                            }
+                        }
+                    }
+                    newLine
+                    "reset (reset all playtime)"() {
+                        style {
+                            green
+                            clickEvent {
+                                runCommand = "/playtime help reset"
+                            }
+                        }
+                    }
+                }
             }
         }
         
