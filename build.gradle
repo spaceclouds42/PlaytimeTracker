@@ -25,7 +25,7 @@ loom {
 }
 
 minecraft {
-    
+    accessWidener = file("src/main/resources/playtime_tracker.accesswidener")
 }
 
 repositories {

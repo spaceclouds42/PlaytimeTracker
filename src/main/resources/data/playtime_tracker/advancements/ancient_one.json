@@ -1,0 +1,19 @@
+{
+  "display": {
+    "icon": {
+      "item": "minecraft:player_head",
+      "nbt": "{SkullOwner:\"jeb_\"}"
+    },
+    "title": "The Ancient One",
+    "description": "100 hours? Where are you getting all this free time!",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "parent": "playtime_tracker:time_marches",
+  "criteria": {
+    "fifty_hours": {
+      "trigger": "playtime_tracker:playtime"
+    }
+  }
+}

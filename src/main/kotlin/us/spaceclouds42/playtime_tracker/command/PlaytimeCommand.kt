@@ -18,6 +18,7 @@ import us.spaceclouds42.playtime_tracker.extension.prettyPrint
 import us.spaceclouds42.playtime_tracker.extension.toPlayer
 import us.spaceclouds42.playtime_tracker.extension.toTime
 import us.spaceclouds42.playtime_tracker.mixin.access.IAccessPlayerManager
+import us.spaceclouds42.playtime_tracker.util.AdvancementHelper
 
 class PlaytimeCommand {
     fun register(): Node {
@@ -131,6 +132,16 @@ class PlaytimeCommand {
                             it,
                             BoolArgumentType.getBool(it, "confirm"),
                         )
+                    }
+
+                    literal("revoke") {
+                        executes {
+                            resetCommand(
+                                it,
+                                BoolArgumentType.getBool(it, "confirm"),
+                                true,
+                            )
+                        }
                     }
                 }
             }
@@ -272,7 +283,7 @@ class PlaytimeCommand {
                     " Command: " {
                         style { darkAqua }
                     }
-                    "/playtime reset [<confirm>]" {
+                    "/playtime reset [<confirm>] [revoke]" {
                         style { gray }
                     }
 
@@ -295,6 +306,15 @@ class PlaytimeCommand {
                             }
                             " playtime will be reset"()
                         }
+                    }
+
+                    newLine
+                    "  revoke" {
+                        style { darkGreen; bold }
+                        " - "(false) {
+                            style { gray }
+                        }
+                        "optional, when revoke param is used, all playtime advancements will be revoked as well"()
                     }
                 }
             }
@@ -471,7 +491,7 @@ class PlaytimeCommand {
         }
     }
 
-    private fun resetCommand(context: Context, confirm: Boolean = false) {
+    private fun resetCommand(context: Context, confirm: Boolean = false, revoke: Boolean = false) {
         if (confirm) {
             OfflineDataCache.INSTANCE.players.forEach { (uuid, immutableTag) ->
                 val tag = immutableTag.copy()
@@ -479,10 +499,29 @@ class PlaytimeCommand {
                     tag.putLong("Playtime", 0L)
                     OfflineDataCache.INSTANCE.save(uuid, tag)
                 }
+                if (revoke) {
+                    // TODO: revoke advancements from offline players too
+                }
             }
 
             context.source.minecraftServer.playerManager.playerList.forEach { player ->
                 (player as AFKPlayer).playtime = 0L
+                if (revoke) {
+                    val ancientHelper = AdvancementHelper(player, "playtime_tracker:ancient_one")
+                    if (ancientHelper.completed()) {
+                        ancientHelper.revoke()
+                    }
+
+                    val timeMarchesHelper = AdvancementHelper(player, "playtime_tracker:time_marches")
+                    if (timeMarchesHelper.completed()) {
+                        timeMarchesHelper.revoke()
+                    }
+
+                    val dedicatedHelper = AdvancementHelper(player, "playtime_tracker:dedicated")
+                    if (dedicatedHelper.completed()) {
+                        dedicatedHelper.revoke()
+                    }
+                }
             }
 
             context.source.sendFeedback(

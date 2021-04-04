@@ -25,6 +25,7 @@
   "mixins": [
     "playtime_tracker.mixins.json"
   ],
+  "accessWidener": "playtime_tracker.accesswidener",
   "depends": {
     "fabricloader": ">=0.7.1",
     "fabric": "*",
