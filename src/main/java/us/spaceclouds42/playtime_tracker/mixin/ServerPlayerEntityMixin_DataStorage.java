@@ -66,6 +66,9 @@ abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
     private void saveData(CompoundTag tag, CallbackInfo ci) {
         LongTag playtimeTag = LongTag.of(this.playtime);
         tag.put("Playtime", playtimeTag);
+
+        LongTag tempPlaytimeTag = LongTag.of(this.tempPlaytime);
+        tag.put("TempPlaytime", tempPlaytimeTag);
     }
 
     @Inject(
@@ -78,6 +81,10 @@ abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
         if (tag.contains("Playtime")) {
             this.playtime = tag.getLong("Playtime");
         }
+
+        if (tag.contains("TempPlaytime")) {
+            this.tempPlaytime = tag.getLong("TempPlaytime");
+        }
     }
 
     @Inject(
@@ -89,5 +96,6 @@ abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
     private void copyData(ServerPlayerEntity oldPlayer, boolean alive, CallbackInfo ci) {
         this.isAfk = ((AFKPlayer) oldPlayer).isAfk();
         this.playtime = ((AFKPlayer) oldPlayer).getPlaytime();
+        this.tempPlaytime = ((AFKPlayer) oldPlayer).getTempPlaytime();
     }
 }

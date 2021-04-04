@@ -33,9 +33,13 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
             if (afkPlayer.getStrictLastActionTime() > 0L && nowTickTime - afkPlayer.getStrictLastActionTime() > this.afkTime) {
                 afkPlayer.setAfk(true);
                 afkPlayer.setPlaytime(afkPlayer.getPlaytime() - this.afkTime); // removes last 5 afk minutes of playtime
+                afkPlayer.setTempPlaytime(afkPlayer.getTempPlaytime() - this.afkTime);
             } else {
                 afkPlayer.setPlaytime(
                         afkPlayer.getPlaytime() + (nowTickTime - this.lastTickTime)
+                );
+                afkPlayer.setTempPlaytime(
+                        afkPlayer.getTempPlaytime() + (nowTickTime - this.lastTickTime)
                 );
 
                 PlaytimeCriterion.trigger(this.player);
