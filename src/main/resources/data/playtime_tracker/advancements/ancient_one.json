@@ -6,6 +6,7 @@
     },
     "title": "The Ancient One",
     "description": "100 hours? Where are you getting all this free time!",
+    "frame": "goal",
     "show_toast": true,
     "announce_to_chat": true,
     "hidden": true

@@ -3,24 +3,24 @@ package us.spaceclouds42.playtime_tracker.util
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 
-class AdvancementHelper(player: ServerPlayerEntity, id: String) {
-    private val tracker = player.advancementTracker
-    private val advancement = player.server.advancementLoader[Identifier.tryParse(id)]
-    private val progress = tracker.getProgress(advancement)
+object AdvancementHelper {
+    fun grant(player: ServerPlayerEntity, id: String) {
+        val tracker = player.advancementTracker
+        val advancement = player.server.advancementLoader[Identifier.tryParse(id)]
+        val progress = tracker.getProgress(advancement)
 
-    fun grant() {
-        progress.unobtainedCriteria.forEach {
-            this.tracker.grantCriterion(advancement, it)
+        progress.unobtainedCriteria.forEach { criterion ->
+            tracker.grantCriterion(advancement, criterion)
         }
     }
 
-    fun revoke() {
-        progress.obtainedCriteria.forEach {
-            this.tracker.revokeCriterion(advancement, it)
-        }
-    }
+    fun revoke(player: ServerPlayerEntity, id: String) {
+        val tracker = player.advancementTracker
+        val advancement = player.server.advancementLoader[Identifier.tryParse(id)]
+        val progress = tracker.getProgress(advancement)
 
-    fun completed(): Boolean {
-        return this.progress.isDone
+        progress.obtainedCriteria.forEach { criterion ->
+            tracker.revokeCriterion(advancement, criterion)
+        }
     }
 }

@@ -5,11 +5,13 @@ import com.mojang.authlib.GameProfile
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
+import me.basiqueevangelist.nevseti.OfflineAdvancementUtils
 import me.basiqueevangelist.nevseti.OfflineDataCache
 import me.basiqueevangelist.nevseti.OfflineNameCache
 import net.minecraft.command.argument.GameProfileArgumentType
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.LiteralText
+import net.minecraft.util.Identifier
 import us.spaceclouds42.ekho.ekho
 import us.spaceclouds42.playtime_tracker.Context
 import us.spaceclouds42.playtime_tracker.Node
@@ -500,27 +502,32 @@ class PlaytimeCommand {
                     OfflineDataCache.INSTANCE.save(uuid, tag)
                 }
                 if (revoke) {
-                    // TODO: revoke advancements from offline players too
+                    OfflineAdvancementUtils.revoke(
+                        uuid,
+                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:end_of_time")]
+                    )
+                    OfflineAdvancementUtils.revoke(
+                        uuid,
+                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:ancient_one")]
+                    )
+                    OfflineAdvancementUtils.revoke(
+                        uuid,
+                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:time_marches")]
+                    )
+                    OfflineAdvancementUtils.revoke(
+                        uuid,
+                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:dedicated")]
+                    )
                 }
             }
 
             context.source.minecraftServer.playerManager.playerList.forEach { player ->
                 (player as AFKPlayer).playtime = 0L
                 if (revoke) {
-                    val ancientHelper = AdvancementHelper(player, "playtime_tracker:ancient_one")
-                    if (ancientHelper.completed()) {
-                        ancientHelper.revoke()
-                    }
-
-                    val timeMarchesHelper = AdvancementHelper(player, "playtime_tracker:time_marches")
-                    if (timeMarchesHelper.completed()) {
-                        timeMarchesHelper.revoke()
-                    }
-
-                    val dedicatedHelper = AdvancementHelper(player, "playtime_tracker:dedicated")
-                    if (dedicatedHelper.completed()) {
-                        dedicatedHelper.revoke()
-                    }
+                    AdvancementHelper.revoke(player, "playtime_tracker:end_of_time")
+                    AdvancementHelper.revoke(player, "playtime_tracker:ancient_one")
+                    AdvancementHelper.revoke(player, "playtime_tracker:time_marches")
+                    AdvancementHelper.revoke(player, "playtime_tracker:dedicated")
                 }
             }
 

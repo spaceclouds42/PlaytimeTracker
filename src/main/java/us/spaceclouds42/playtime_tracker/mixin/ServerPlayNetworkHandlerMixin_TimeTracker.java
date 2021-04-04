@@ -9,21 +9,14 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import us.spaceclouds42.playtime_tracker.advancement.PlaytimeCriterion;
 import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
-import us.spaceclouds42.playtime_tracker.util.AdvancementHelper;
 
 @Mixin(ServerPlayNetworkHandler.class)
 abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
     @Shadow public ServerPlayerEntity player;
     @Unique private long lastTickTime = Util.getMeasuringTimeMs();
-
-    final long min = 60000L;
-    final long hour = min * 60;
-    @Unique private final long afkTime = min * 5;
-    // Advancement time requirements
-    @Unique private final long dedicatedTime = hour * 10;
-    @Unique private final long timeMarchesTime = hour * 25;
-    @Unique private final long ancientOneTime = hour * 100;
+    @Unique private final long afkTime = 60000L * 5L;
 
     @Inject(
             method = "tick",
@@ -44,7 +37,7 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
                         afkPlayer.getPlaytime() + (nowTickTime - this.lastTickTime)
                 );
 
-                applyAdvancements(afkPlayer);
+                PlaytimeCriterion.trigger(this.player);
             }
         } else {
             if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() < this.afkTime) {
@@ -53,29 +46,5 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
         }
 
         this.lastTickTime = nowTickTime;
-    }
-
-    @Unique
-    private void applyAdvancements(AFKPlayer afkPlayer) {
-        if (afkPlayer.getPlaytime() >= this.ancientOneTime) {
-            AdvancementHelper helper = new AdvancementHelper(this.player, "playtime_tracker:ancient_one");
-            if (!helper.completed()) {
-                helper.grant();
-            }
-        }
-
-        if (afkPlayer.getPlaytime() >= this.timeMarchesTime) {
-            AdvancementHelper helper = new AdvancementHelper(this.player, "playtime_tracker:time_marches");
-            if (!helper.completed()) {
-                helper.grant();
-            }
-        }
-
-        if (afkPlayer.getPlaytime() >= this.dedicatedTime) {
-            AdvancementHelper helper = new AdvancementHelper(this.player, "playtime_tracker:dedicated");
-            if (!helper.completed()) {
-                helper.grant();
-            }
-        }
     }
 }
