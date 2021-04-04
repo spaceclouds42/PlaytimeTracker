@@ -1,5 +1,6 @@
 package us.spaceclouds42.playtime_tracker.mixin;
 
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Util;
@@ -29,7 +30,7 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
         long nowTickTime = Util.getMeasuringTimeMs();
 
         if (!afkPlayer.isAfk()) {
-            if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() > this.afkTime) {
+            if (afkPlayer.strictLastActionTime() > 0L && nowTickTime - afkPlayer.strictLastActionTime() > this.afkTime) {
                 afkPlayer.setAfk(true);
                 afkPlayer.setPlaytime(afkPlayer.getPlaytime() - this.afkTime); // removes last 5 afk minutes of playtime
             } else {
@@ -40,11 +41,23 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
                 PlaytimeCriterion.trigger(this.player);
             }
         } else {
-            if (this.player.getLastActionTime() > 0L && nowTickTime - this.player.getLastActionTime() < this.afkTime) {
+            if (afkPlayer.strictLastActionTime() > 0L && nowTickTime - afkPlayer.strictLastActionTime() < this.afkTime) {
                 afkPlayer.setAfk(false);
             }
         }
 
         this.lastTickTime = nowTickTime;
+    }
+
+    @Inject(
+            method = "onPlayerMove",
+            at = @At(
+                    value = "HEAD"
+            )
+    )
+    private void updateLastActionTime(PlayerMoveC2SPacket packet, CallbackInfo ci) {
+        if (packet instanceof PlayerMoveC2SPacket.LookOnly || packet instanceof PlayerMoveC2SPacket.Both) {
+            ((AFKPlayer) this.player).setStrictLastActionTime(Util.getMeasuringTimeMs());
+        }
     }
 }
