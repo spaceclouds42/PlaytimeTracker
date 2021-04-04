@@ -14,6 +14,8 @@ import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
 abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
     @Unique private boolean isAfk;
     @Unique private long playtime;
+    @Unique private long tempPlaytime;
+    @Unique private long strictLastActionTime;
 
     @Override
     public boolean isAfk() {
@@ -33,6 +35,26 @@ abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
     @Override
     public void setPlaytime(long playtime) {
         this.playtime = playtime;
+    }
+
+    @Override
+    public long getTempPlaytime() {
+        return this.tempPlaytime;
+    }
+
+    @Override
+    public void setTempPlaytime(long playtime) {
+        this.tempPlaytime = playtime;
+    }
+
+    @Override
+    public long getStrictLastActionTime() {
+        return this.strictLastActionTime;
+    }
+
+    @Override
+    public void setStrictLastActionTime(long playtime) {
+        this.strictLastActionTime = playtime;
     }
 
     @Inject(

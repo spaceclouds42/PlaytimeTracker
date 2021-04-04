@@ -7,6 +7,9 @@ public interface AFKPlayer {
     long getPlaytime();
     void setPlaytime(long playtime);
 
-    long strictLastActionTime();
+    long getTempPlaytime();
+    void setTempPlaytime(long playtime);
+
+    long getStrictLastActionTime();
     void setStrictLastActionTime(long time);
 }
