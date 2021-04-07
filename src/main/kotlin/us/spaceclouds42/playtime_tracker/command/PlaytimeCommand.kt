@@ -5,6 +5,8 @@ import com.mojang.authlib.GameProfile
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import me.basiqueevangelist.nevseti.OfflineAdvancementUtils
 import me.basiqueevangelist.nevseti.OfflineDataCache
 import me.basiqueevangelist.nevseti.OfflineNameCache
@@ -37,113 +39,231 @@ class PlaytimeCommand {
                     )
                 }
 
+                literal("alltime") {
+                    literal("player") {
+                        executes {
+                            helpCommand(
+                                it,
+                                "player",
+                            )
+                        }
+                    }
+
+                    literal("top") {
+                        executes {
+                            helpCommand(
+                                it,
+                                "top",
+                            )
+                        }
+                    }
+
+                    literal("reset") {
+                        executes {
+                            helpCommand(
+                                it,
+                                "reset",
+                            )
+                        }
+                    }
+                }
+
+                literal("temp") {
+                    literal("player") {
+                        executes {
+                            helpCommand(
+                                it,
+                                "player",
+                                temp=true,
+                            )
+                        }
+                    }
+
+                    literal("top") {
+                        executes {
+                            helpCommand(
+                                it,
+                                "top",
+                                temp=true,
+                            )
+                        }
+                    }
+
+                    literal("reset") {
+                        executes {
+                            helpCommand(
+                                it,
+                                "reset",
+                                temp=true,
+                            )
+                        }
+                    }
+                }
+            }
+
+            literal("alltime") {
                 literal("player") {
-                    executes {
-                        helpCommand(
-                            it,
-                            "player",
-                        )
+                    gameProfile("targets") {
+                        executes {
+                            getTimeCommand(
+                                it,
+                                GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                            )
+                        }
+
+                        literal("set") {
+                            greedyString("time") {
+                                executes {
+                                    setTimeCommand(
+                                        it,
+                                        GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                        StringArgumentType.getString(it, "time").toTime(),
+                                    )
+                                }
+                            }
+                        }
+
+                        literal("add") {
+                            greedyString("time") {
+                                executes {
+                                    addTimeCommand(
+                                        it,
+                                        GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                        StringArgumentType.getString(it, "time").toTime(),
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
 
                 literal("top") {
                     executes {
-                        helpCommand(
+                        topCommand(
                             it,
-                            "top",
                         )
+                    }
+
+                    integer("count", min = 1) {
+                        executes {
+                            topCommand(
+                                it,
+                                IntegerArgumentType.getInteger(it, "count")
+                            )
+                        }
                     }
                 }
 
                 literal("reset") {
-                    executes {
-                        helpCommand(
-                            it,
-                            "reset",
-                        )
-                    }
-                }
-            }
-
-            literal("player") {
-                gameProfile("targets") {
-                    executes {
-                        getTimeCommand(
-                            it,
-                            GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
-                        )
-                    }
-
-                    literal("set") {
-                        greedyString("time") {
-                            executes {
-                                setTimeCommand(
-                                    it,
-                                    GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
-                                    StringArgumentType.getString(it, "time").toTime(),
-                                )
-                            }
-                        }
-                    }
-
-                    literal("add") {
-                        greedyString("time") {
-                            executes {
-                                addTimeCommand(
-                                    it,
-                                    GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
-                                    StringArgumentType.getString(it, "time").toTime(),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            literal("top") {
-                executes {
-                    topCommand(
-                        it,
-                    )
-                }
-
-                integer("count", min=1) {
-                    executes {
-                        topCommand(
-                            it,
-                            IntegerArgumentType.getInteger(it, "count")
-                        )
-                    }
-                }
-            }
-
-            literal("reset") {
-                executes {
-                    resetCommand(
-                        it,
-                    )
-                }
-
-                bool("confirm") {
-                    requires {
-                        it.hasPermissionLevel(4)
-                    }
-
-                    executes {
+                    executes { GlobalScope.launch {
                         resetCommand(
                             it,
-                            BoolArgumentType.getBool(it, "confirm"),
                         )
-                    }
+                    } }
 
-                    literal("revoke") {
-                        executes {
+                    bool("confirm") {
+                        requires {
+                            it.hasPermissionLevel(4)
+                        }
+
+                        executes { GlobalScope.launch {
                             resetCommand(
                                 it,
                                 BoolArgumentType.getBool(it, "confirm"),
-                                true,
+                            )
+                        } }
+
+                        literal("revoke") {
+                            executes { GlobalScope.launch {
+                                resetCommand(
+                                    it,
+                                    BoolArgumentType.getBool(it, "confirm"),
+                                    true,
+                                )
+                            } }
+                        }
+                    }
+                }
+            }
+
+            literal("temp") {
+                literal("player") {
+                    gameProfile("targets") {
+                        executes {
+                            getTimeCommand(
+                                it,
+                                GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                temp=true,
                             )
                         }
+
+                        literal("set") {
+                            greedyString("time") {
+                                executes {
+                                    setTimeCommand(
+                                        it,
+                                        GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                        StringArgumentType.getString(it, "time").toTime(),
+                                        temp=true,
+                                    )
+                                }
+                            }
+                        }
+
+                        literal("add") {
+                            greedyString("time") {
+                                executes {
+                                    addTimeCommand(
+                                        it,
+                                        GameProfileArgumentType.getProfileArgument(it, "targets").iterator(),
+                                        StringArgumentType.getString(it, "time").toTime(),
+                                        temp=true,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                literal("top") {
+                    executes {
+                        topCommand(
+                            it,
+                            temp=true,
+                        )
+                    }
+
+                    integer("count", min = 1) {
+                        executes {
+                            topCommand(
+                                it,
+                                IntegerArgumentType.getInteger(it, "count"),
+                                temp=true,
+                            )
+                        }
+                    }
+                }
+
+                literal("reset") {
+                    executes { GlobalScope.launch {
+                        resetCommand(
+                            it,
+                            temp=true,
+                        )
+                    } }
+
+                    bool("confirm") {
+                        requires {
+                            it.hasPermissionLevel(4)
+                        }
+
+                        executes { GlobalScope.launch {
+                            resetCommand(
+                                it,
+                                confirm=BoolArgumentType.getBool(it, "confirm"),
+                                temp=true,
+                            )
+                        } }
                     }
                 }
             }
@@ -151,7 +271,8 @@ class PlaytimeCommand {
             .build()
     }
 
-    private fun helpCommand(context: Context, command: String?) {
+    private fun helpCommand(context: Context, command: String?, temp: Boolean = false) {
+        val tempArg = if (temp) { "temp" } else { "alltime" }
         val text = when (command) {
             "player" -> {
                 ekho {
@@ -169,7 +290,7 @@ class PlaytimeCommand {
                     " Command: " {
                         style { darkAqua }
                     }
-                    "/playtime player <targets> [(add|set)] [<time>]" {
+                    "/playtime $tempArg player <targets> [(add|set)] [<time>]" {
                         style { gray }
                     }
 
@@ -246,7 +367,7 @@ class PlaytimeCommand {
                     " Command: " {
                         style { darkAqua }
                     }
-                    "/playtime top [<count>]" {
+                    "/playtime $tempArg top [<count>]" {
                         style { gray }
                     }
 
@@ -285,7 +406,7 @@ class PlaytimeCommand {
                     " Command: " {
                         style { darkAqua }
                     }
-                    "/playtime reset [<confirm>] [revoke]" {
+                    "/playtime $tempArg reset [<confirm>] [revoke]" {
                         style { gray }
                     }
 
@@ -317,6 +438,8 @@ class PlaytimeCommand {
                             style { gray }
                         }
                         "optional, when revoke param is used, all playtime advancements will be revoked as well"()
+                        newLine
+                        "Note that when resetting temp times, advancements cannot be revoked"()
                     }
                 }
             }
@@ -334,8 +457,10 @@ class PlaytimeCommand {
                     }
 
                     newLine
-                    "Welcome to the help menu! For more info about specific commands, click below."() {
+                    "Welcome to the help menu! For more info about specific commands, click below." {
                         style { darkAqua }
+                        newLine
+                        "All commands have 2 versions, one for alltime and one for temp." { style { italics } }
                     }
 
                     newLine
@@ -343,7 +468,7 @@ class PlaytimeCommand {
                         style {
                             green
                             clickEvent {
-                                runCommand = "/playtime help player"
+                                runCommand = "/playtime help $tempArg player"
                             }
                         }
                     }
@@ -352,7 +477,7 @@ class PlaytimeCommand {
                         style {
                             darkGreen
                             clickEvent {
-                                runCommand = "/playtime help top"
+                                runCommand = "/playtime help $tempArg top"
                             }
                         }
                     }
@@ -361,7 +486,7 @@ class PlaytimeCommand {
                         style {
                             green
                             clickEvent {
-                                runCommand = "/playtime help reset"
+                                runCommand = "/playtime help $tempArg reset"
                             }
                         }
                     }
@@ -372,11 +497,11 @@ class PlaytimeCommand {
         context.source.sendFeedback(text, false)
     }
 
-    private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>) {
+    private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>, temp: Boolean = false) {
         targets.forEach { target ->
             val player = target.toPlayer(context.source.minecraftServer.playerManager) as AFKPlayer?
             if (player != null) {
-                val time = player.playtime.prettyPrint()
+                val time = (if (temp) { player.tempPlaytime } else { player.playtime }).prettyPrint()
                 context.source.sendFeedback(
                     LiteralText("§9${target.name} §ehas §9$time §eof playtime."),
                     false
@@ -386,8 +511,8 @@ class PlaytimeCommand {
                 if (offlineData != null && offlineData.contains("Playtime")) {
                     context.source.sendFeedback(
                         LiteralText(
-                            "§9${target.name} §ehas §9${offlineData.getLong("Playtime").prettyPrint()}" +
-                                    " §eof playtime."
+                            "§9${target.name} §ehas §9${offlineData.getLong(if (temp) { "TempPlaytime" } else 
+                            { "Playtime" }).prettyPrint()} §eof playtime."
                         ),
                         false
                     )
@@ -401,7 +526,7 @@ class PlaytimeCommand {
         }
     }
 
-    private fun setTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long) {
+    private fun setTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long, temp: Boolean = false) {
         val manager = context.source.minecraftServer.playerManager
 
         targets.forEach { target ->
@@ -414,7 +539,7 @@ class PlaytimeCommand {
 
             val player = requestedPlayer as AFKPlayer
 
-            player.playtime = time
+            if (temp) { player.tempPlaytime = time } else { player.playtime = time }
             (manager as IAccessPlayerManager).invokeSavePlayerData(player as ServerPlayerEntity)
 
             context.source.sendFeedback(
@@ -424,7 +549,7 @@ class PlaytimeCommand {
         }
     }
 
-    private fun addTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long) {
+    private fun addTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long, temp: Boolean = false) {
         val manager = context.source.minecraftServer.playerManager
 
         targets.forEach { target ->
@@ -432,13 +557,20 @@ class PlaytimeCommand {
 
             // Online Player
             if (player != null) {
-                setTimeCommand(context, listOf(target).iterator(), player.playtime + time)
+                setTimeCommand(
+                    context,
+                    listOf(target).iterator(),
+                    if (temp) { player.tempPlaytime } else { player.playtime } + time
+                )
             } else {
 
                 // Offline Player
                 val offlineData = OfflineDataCache.INSTANCE.players[target.id]
                 if (offlineData != null && offlineData.contains("Playtime")) {
-                    setTimeCommand(context, listOf(target).iterator(), offlineData.getLong("Playtime") + time)
+                    setTimeCommand(
+                        context,
+                        listOf(target).iterator(),
+                        offlineData.getLong(if (temp) { "TempPlaytime" } else { "Playtime" }) + time)
 
                 // Player not found
                 } else {
@@ -448,7 +580,7 @@ class PlaytimeCommand {
         }
     }
 
-    private fun topCommand(context: Context, count: Int = 3) {
+    private fun topCommand(context: Context, count: Int = 3, temp: Boolean = false) {
         val source = context.source
 
         source.sendFeedback(
@@ -459,13 +591,23 @@ class PlaytimeCommand {
         val times = mutableMapOf<String, Long?>()
         OfflineDataCache.INSTANCE.players.forEach { (uuid, tag) ->
             val name = OfflineNameCache.INSTANCE.getNameFromUUID(uuid)
-            val time = if (tag.contains("Playtime")) { tag.getLong("Playtime") } else { null }
+            val time = if (tag.contains("Playtime")) {
+                tag.getLong(
+                    if (temp) { "TempPlaytime" } else { "Playtime" }
+                )
+            } else {
+                null
+            }
             times[name] = time
         }
 
         // Use latest data for any online players
         context.source.minecraftServer.playerManager.playerList.forEach { player ->
-            times[player.entityName] = (player as AFKPlayer).playtime
+            times[player.entityName] = if (temp) {
+                    (player as AFKPlayer).tempPlaytime
+            } else {
+                    (player as AFKPlayer).playtime
+            }
         }
 
         val top = times.toList().sortedBy { (_, value) -> value }.asReversed().toMap()
@@ -493,12 +635,18 @@ class PlaytimeCommand {
         }
     }
 
-    private fun resetCommand(context: Context, confirm: Boolean = false, revoke: Boolean = false) {
+    private fun resetCommand(context: Context, confirm: Boolean = false, revoke: Boolean = false, temp: Boolean = false) {
         if (confirm) {
             OfflineDataCache.INSTANCE.players.forEach { (uuid, immutableTag) ->
                 val tag = immutableTag.copy()
-                if (tag.contains("Playtime")) {
-                    tag.putLong("Playtime", 0L)
+                if (!temp) {
+                    if (tag.contains("Playtime")) {
+                        tag.putLong("Playtime", 0L)
+                        OfflineDataCache.INSTANCE.save(uuid, tag)
+                    }
+                }
+                if (tag.contains("TempPlaytime")) {
+                    tag.putLong("TempPlaytime", 0L)
                     OfflineDataCache.INSTANCE.save(uuid, tag)
                 }
                 if (revoke) {
@@ -522,7 +670,8 @@ class PlaytimeCommand {
             }
 
             context.source.minecraftServer.playerManager.playerList.forEach { player ->
-                (player as AFKPlayer).playtime = 0L
+                if (!temp) { (player as AFKPlayer).playtime = 0L }
+                (player as AFKPlayer).tempPlaytime = 0L
                 if (revoke) {
                     AdvancementHelper.revoke(player, "playtime_tracker:end_of_time")
                     AdvancementHelper.revoke(player, "playtime_tracker:ancient_one")
@@ -531,17 +680,29 @@ class PlaytimeCommand {
                 }
             }
 
-            context.source.sendFeedback(
-                LiteralText("§aReset all playtime."),
-                true
-            )
-        } else {
-            context.source.sendError(
-                LiteralText(
-                    "§cAre you sure you want to reset all playtimes? This action is not reversible! If you are" +
-                            " certain you wish to proceed, run:\n§7/playtime reset true"
+            if (temp) {
+                context.source.sendFeedback(
+                    ekho("Reset all temp playtimes") { style { green } },
+                    true,
                 )
-            )
+            } else {
+                context.source.sendFeedback(
+                    ekho("Reset all playtimes") { style { green } },
+                    true,
+                )
+            }
+        } else {
+            if (temp) {
+                context.source.sendError(
+                    ekho("§cAre you sure you want to reset all temp playtimes? This action is not reversible! If you are" +
+                            " certain you wish to proceed, run:\n§7/playtime temp reset true")
+                )
+            } else {
+                context.source.sendError(
+                    ekho("§cAre you sure you want to reset all playtimes? This action is not reversible! If you are" +
+                            " certain you wish to proceed, run:\n§7/playtime alltime reset true")
+                )
+            }
         }
     }
 }
