@@ -5,6 +5,7 @@
   "mixins": [
     "PlayerListS2CPacketMixin_AFKDisplay",
     "PlayerListS2CPacketMixin_AFKDisplay$EntryMixin",
+    "PlayerManagerMixin_StartAFKDetection",
     "ServerPlayerEntityMixin_DataStorage",
     "ServerPlayNetworkHandlerMixin_TimeTracker",
     "access.IAccessPlayerManager"
