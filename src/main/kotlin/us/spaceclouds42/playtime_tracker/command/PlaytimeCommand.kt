@@ -40,6 +40,14 @@ class PlaytimeCommand {
                 }
 
                 literal("alltime") {
+                    executes {
+                        helpCommand(
+                            it,
+                            null,
+                            temp=false,
+                        )
+                    }
+
                     literal("player") {
                         executes {
                             helpCommand(
@@ -69,6 +77,14 @@ class PlaytimeCommand {
                 }
 
                 literal("temp") {
+                    executes {
+                        helpCommand(
+                            it,
+                            null,
+                            temp=true,
+                        )
+                    }
+
                     literal("player") {
                         executes {
                             helpCommand(
@@ -438,9 +454,10 @@ class PlaytimeCommand {
                             style { gray }
                         }
                         "optional, when revoke param is used, all playtime advancements will be revoked as well"()
-                        newLine
-                        "Note that when resetting temp times, advancements cannot be revoked"()
                     }
+
+                    newLine
+                    "Note that when resetting temp times, advancements cannot be revoked" { style { green; italics } }
                 }
             }
 
@@ -528,6 +545,7 @@ class PlaytimeCommand {
 
     private fun setTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long, temp: Boolean = false) {
         val manager = context.source.minecraftServer.playerManager
+        val tracker = if (temp) { "temp" } else { "all time" }
 
         targets.forEach { target ->
             var requestedPlayer = target.toPlayer(manager)
@@ -543,7 +561,7 @@ class PlaytimeCommand {
             (manager as IAccessPlayerManager).invokeSavePlayerData(player as ServerPlayerEntity)
 
             context.source.sendFeedback(
-                LiteralText("§eSet §9${target.name} §eto §9${time.prettyPrint()} §eof playtime."),
+                ekho("§eSet §9${target.name} §eto §9${time.prettyPrint()} §eof playtime. ($tracker)"),
                 true
             )
         }
