@@ -1,6 +1,5 @@
 package us.spaceclouds42.playtime_tracker.mixin;
 
-import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -19,7 +18,7 @@ import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
 abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
     @Shadow public ServerPlayerEntity player;
     @Unique private long lastTickTime = Util.getMeasuringTimeMs();
-    @Unique private final long afkTime = 60000L / 3L;
+    @Unique private final long afkTime = 60000L * 5L;
 
     @Inject(
             method = "tick",
