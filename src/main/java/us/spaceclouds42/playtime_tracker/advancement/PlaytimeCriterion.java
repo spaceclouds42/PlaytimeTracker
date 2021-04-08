@@ -1,4 +1,4 @@
-package us.spaceclouds42.playtime_tracker.advancement;
+package us.spaceclouds42.playtime_tracker.advancement
 
 import com.google.gson.JsonObject;
 import net.minecraft.advancement.criterion.AbstractCriterion;
