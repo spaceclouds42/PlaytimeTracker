@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,8 +30,10 @@ abstract class PlayerListS2CPacketMixin_AFKDisplay {
                 cancellable = true
         )
         private void modifyDisplayName(CallbackInfoReturnable<Text> cir) {
-            if (((AFKPlayer) Common.SERVER.getPlayerManager().createPlayer(this.profile)).isAfk()) {
-                cir.setReturnValue(this.displayName.copy().formatted(Formatting.GRAY));
+            ServerPlayerEntity player = Common.SERVER.getPlayerManager().getPlayer(this.profile.getId());
+            if (((AFKPlayer) player).isAfk()) {
+                System.out.println(player.getEntityName() + " is afk!");
+                cir.setReturnValue(player.getDisplayName().copy().formatted(Formatting.GRAY));
             }
         }
     }

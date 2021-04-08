@@ -1,6 +1,8 @@
 package us.spaceclouds42.playtime_tracker.mixin;
 
+import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerListS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Util;
@@ -17,7 +19,7 @@ import us.spaceclouds42.playtime_tracker.duck.AFKPlayer;
 abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
     @Shadow public ServerPlayerEntity player;
     @Unique private long lastTickTime = Util.getMeasuringTimeMs();
-    @Unique private final long afkTime = 60000L * 5L;
+    @Unique private final long afkTime = 60000L / 3L;
 
     @Inject(
             method = "tick",
@@ -34,6 +36,9 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
                 afkPlayer.setAfk(true);
                 afkPlayer.setPlaytime(afkPlayer.getPlaytime() - this.afkTime); // removes last 5 afk minutes of playtime
                 afkPlayer.setTempPlaytime(afkPlayer.getTempPlaytime() - this.afkTime);
+                this.player.server.getPlayerManager().sendToAll(
+                    new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, this.player)
+                );
             } else {
                 afkPlayer.setPlaytime(
                         afkPlayer.getPlaytime() + (nowTickTime - this.lastTickTime)
@@ -43,10 +48,6 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
                 );
 
                 PlaytimeCriterion.trigger(this.player);
-            }
-        } else {
-            if (afkPlayer.getStrictLastActionTime() > 0L && nowTickTime - afkPlayer.getStrictLastActionTime() < this.afkTime) {
-                afkPlayer.setAfk(false);
             }
         }
 
@@ -60,8 +61,14 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
             )
     )
     private void updateLastActionTime(PlayerMoveC2SPacket packet, CallbackInfo ci) {
-        if (packet instanceof PlayerMoveC2SPacket.LookOnly || packet instanceof PlayerMoveC2SPacket.Both) {
+        if (packet instanceof PlayerMoveC2SPacket.LookOnly) {
             ((AFKPlayer) this.player).setStrictLastActionTime(Util.getMeasuringTimeMs());
+            if (((AFKPlayer) this.player).isAfk()) {
+                ((AFKPlayer) this.player).setAfk(false);
+                this.player.server.getPlayerManager().sendToAll(
+                        new PlayerListS2CPacket(PlayerListS2CPacket.Action.UPDATE_DISPLAY_NAME, this.player)
+                );
+            }
         }
     }
 }
