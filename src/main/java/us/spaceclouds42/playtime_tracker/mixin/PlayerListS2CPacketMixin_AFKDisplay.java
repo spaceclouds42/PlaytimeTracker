@@ -31,7 +31,7 @@ abstract class PlayerListS2CPacketMixin_AFKDisplay {
         )
         private void modifyDisplayName(CallbackInfoReturnable<Text> cir) {
             ServerPlayerEntity player = Common.SERVER.getPlayerManager().getPlayer(this.profile.getId());
-            if (((AFKPlayer) player).isAfk()) {
+            if (player != null && ((AFKPlayer) player).isAfk()) {
                 System.out.println(player.getEntityName() + " is afk!");
                 cir.setReturnValue(player.getDisplayName().copy().formatted(Formatting.GRAY));
             }
