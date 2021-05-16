@@ -26,7 +26,7 @@ every command.
 [Fabric API Badge]: https://i.imgur.com/HabVZJR.png
 [FLK Badge]: https://i.imgur.com/PIrYlbR.png
 [Player Badge]: https://media.discordapp.net/attachments/756264675905241210/828804618020061214/image.png?width=1023&height=215
-[Discord Badge]: https://discord.com/assets/bb408e0343ddedc0967f246f7e89cebf.svg
+[Discord Badge]: https://discord.com/assets/cb48d2a8d4991281d7a6a95d2f58195e.svg
 
 <!-- Hyperlink URLs -->
 [Fabric API Download]: https://modrinth.com/mod/fabric-api
