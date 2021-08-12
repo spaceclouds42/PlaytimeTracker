@@ -12,6 +12,7 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+
 loom {
     runs {
          guiServer {
@@ -29,9 +30,9 @@ minecraft {
 }
 
 repositories {
-    maven { url = "http://maven.fabricmc.net/" }
-    maven { url = "https://dl.bintray.com/kotlin/kotlin-eap" }
-    maven { url = "https://dl.bintray.com/kotlin/dokka" }
+    maven { url = "http://maven.fabricmc.net/"
+            allowInsecureProtocol = true
+          }
     maven { url = "https://jitpack.io" }
     mavenCentral()
 }
@@ -76,6 +77,8 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude "fabric.mod.json"
     }
+
+    duplicatesStrategy = 'include'
 }
 
 // ensure that the encoding is set to UTF-8, no matter what the system default is
