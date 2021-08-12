@@ -60,7 +60,7 @@ abstract class ServerPlayNetworkHandlerMixin_TimeTracker {
             )
     )
     private void updateLastActionTime(PlayerMoveC2SPacket packet, CallbackInfo ci) {
-        if (packet instanceof PlayerMoveC2SPacket.LookOnly) {
+        if (packet instanceof PlayerMoveC2SPacket.LookAndOnGround) {
             ((AFKPlayer) this.player).setStrictLastActionTime(Util.getMeasuringTimeMs());
             if (((AFKPlayer) this.player).isAfk()) {
                 ((AFKPlayer) this.player).setAfk(false);

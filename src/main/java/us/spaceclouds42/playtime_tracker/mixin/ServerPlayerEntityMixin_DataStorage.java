@@ -1,7 +1,7 @@
 package us.spaceclouds42.playtime_tracker.mixin;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.NbtLong;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -58,26 +58,26 @@ abstract class ServerPlayerEntityMixin_DataStorage implements AFKPlayer {
     }
 
     @Inject(
-            method = "writeCustomDataToTag",
+            method = "writeCustomDataToNbt",
             at = @At(
                     value = "TAIL"
             )
     )
-    private void saveData(CompoundTag tag, CallbackInfo ci) {
-        LongTag playtimeTag = LongTag.of(this.playtime);
+    private void saveData(NbtCompound tag, CallbackInfo ci) {
+        NbtLong playtimeTag = NbtLong.of(this.playtime);
         tag.put("Playtime", playtimeTag);
 
-        LongTag tempPlaytimeTag = LongTag.of(this.tempPlaytime);
+        NbtLong tempPlaytimeTag = NbtLong.of(this.tempPlaytime);
         tag.put("TempPlaytime", tempPlaytimeTag);
     }
 
     @Inject(
-            method = "readCustomDataFromTag",
+            method = "readCustomDataFromNbt",
             at = @At(
                     value = "TAIL"
             )
     )
-    private void readData(CompoundTag tag, CallbackInfo ci) {
+    private void readData(NbtCompound tag, CallbackInfo ci) {
         if (tag.contains("Playtime")) {
             this.playtime = tag.getLong("Playtime");
         }

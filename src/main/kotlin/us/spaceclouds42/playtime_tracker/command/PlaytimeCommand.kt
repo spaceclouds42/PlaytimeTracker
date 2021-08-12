@@ -516,7 +516,7 @@ class PlaytimeCommand {
 
     private fun getTimeCommand(context: Context, targets: Iterator<GameProfile>, temp: Boolean = false) {
         targets.forEach { target ->
-            val player = target.toPlayer(context.source.minecraftServer.playerManager) as AFKPlayer?
+            val player = target.toPlayer(context.source.server.playerManager) as AFKPlayer?
             if (player != null) {
                 val time = (if (temp) { player.tempPlaytime } else { player.playtime }).prettyPrint()
                 context.source.sendFeedback(
@@ -544,7 +544,7 @@ class PlaytimeCommand {
     }
 
     private fun setTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long, temp: Boolean = false) {
-        val manager = context.source.minecraftServer.playerManager
+        val manager = context.source.server.playerManager
         val tracker = if (temp) { "temp" } else { "all time" }
 
         targets.forEach { target ->
@@ -568,7 +568,7 @@ class PlaytimeCommand {
     }
 
     private fun addTimeCommand(context: Context, targets: Iterator<GameProfile>, time: Long, temp: Boolean = false) {
-        val manager = context.source.minecraftServer.playerManager
+        val manager = context.source.server.playerManager
 
         targets.forEach { target ->
             val player = target.toPlayer(manager) as AFKPlayer?
@@ -620,7 +620,7 @@ class PlaytimeCommand {
         }
 
         // Use latest data for any online players
-        context.source.minecraftServer.playerManager.playerList.forEach { player ->
+        context.source.server.playerManager.playerList.forEach { player ->
             times[player.entityName] = if (temp) {
                     (player as AFKPlayer).tempPlaytime
             } else {
@@ -670,24 +670,24 @@ class PlaytimeCommand {
                 if (revoke) {
                     OfflineAdvancementUtils.revoke(
                         uuid,
-                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:end_of_time")]
+                        context.source.server.advancementLoader[Identifier("playtime_tracker:end_of_time")]
                     )
                     OfflineAdvancementUtils.revoke(
                         uuid,
-                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:ancient_one")]
+                        context.source.server.advancementLoader[Identifier("playtime_tracker:ancient_one")]
                     )
                     OfflineAdvancementUtils.revoke(
                         uuid,
-                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:time_marches")]
+                        context.source.server.advancementLoader[Identifier("playtime_tracker:time_marches")]
                     )
                     OfflineAdvancementUtils.revoke(
                         uuid,
-                        context.source.minecraftServer.advancementLoader[Identifier("playtime_tracker:dedicated")]
+                        context.source.server.advancementLoader[Identifier("playtime_tracker:dedicated")]
                     )
                 }
             }
 
-            context.source.minecraftServer.playerManager.playerList.forEach { player ->
+            context.source.server.playerManager.playerList.forEach { player ->
                 if (!temp) { (player as AFKPlayer).playtime = 0L }
                 (player as AFKPlayer).tempPlaytime = 0L
                 if (revoke) {
